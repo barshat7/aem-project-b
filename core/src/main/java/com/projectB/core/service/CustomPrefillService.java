@@ -6,15 +6,10 @@ import com.adobe.forms.common.service.DataProvider;
 import com.adobe.forms.common.service.FormsException;
 import com.adobe.forms.common.service.PrefillData;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.caconfig.ConfigurationBuilder;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.Designate;
@@ -24,15 +19,17 @@ import org.osgi.framework.Constants;
     service={DataProvider.class, CustomPrefillService.class},
     immediate = true,
     property = {
-        Constants.SERVICE_ID + " = HiddenField-Custom-Prefill-Service",
+        Constants.SERVICE_ID + " = HiddenField-Custom-Prefill-Service", // You can name it according to your use-case
         Constants.SERVICE_DESCRIPTION + " = Hidden Fields Custom Prefill Service"
     }
 )
 @Designate(ocd = MyCustomConfig.class)
 public class CustomPrefillService implements DataProvider {
 
+  // Rename as per your use-case
   public static final String SERVICE_NAME = "custom-hidden-input-prefill-service";
 
+  // Rename as per your use-case
   public static final String SERVICE_DESCRIPTION = "custom-hidden-input-prefill-service";
 
   private MyCustomConfig myCustomConfig;
@@ -44,11 +41,7 @@ public class CustomPrefillService implements DataProvider {
 
   @Override
   public PrefillData getPrefillData(DataOptions dataOptions) throws FormsException {
-    Map<String, String> hiddenFieldsMap = new HashMap<>();
-    hiddenFieldsMap.put("development", "{\"companyId\":\"Development\",\"oid\":\"001\"}");
-    hiddenFieldsMap.put("stage", "{\"companyId\":\"Stage\",\"oid\":\"002\"}");
-    hiddenFieldsMap.put("production", "{\"companyId\":\"Production\",\"oid\":\"003\"}");
-    String data = hiddenFieldsMap.get(myCustomConfig.environment_info());
+    String data = HiddenDataFieldProvider.getFieldsAsJson(myCustomConfig.environment_info());
     try {
       return new PrefillData(getDataInputStream(data), ContentType.JSON);
     } catch (Exception e) {

@@ -7,5 +7,5 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 public @interface MyCustomConfig {
 
   @AttributeDefinition(name = "Environment Information", description = "Environment Info")
-  String environment_info() default "unknown";
+  String environment_info() default "development";
 }
