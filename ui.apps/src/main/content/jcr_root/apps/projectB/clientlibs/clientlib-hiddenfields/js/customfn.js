@@ -19,27 +19,30 @@
  * set hidden fields
  * @name setHiddenFields
  */
-function setHiddenFields(){
+function setHiddenFields() {
   var HIDDEN_FIELD_DATA_SELECTOR = "div[data-af-hidden-fields]";
   var HIDDEN_FIELD_DATA_ATTR = "data-af-hidden-fields";
   guideBridge.connect(function() {
     if (guideBridge.isConnected()) {
       var fieldsKVPair = {}
-      var dataSiteHiddenFields = document.querySelector(HIDDEN_FIELD_DATA_SELECTOR).getAttribute(HIDDEN_FIELD_DATA_ATTR).split(';');
-      for (var i = 0; i < dataSiteHiddenFields.length; i++) {
-        var kv = dataSiteHiddenFields[i].split('=');
-        fieldsKVPair[kv[0]] = kv[1]
-      }
-      var formFields = guideBridge.getFormModel()._fields;
-      for (var kv in fieldsKVPair) {
-        for (var _field in formFields) {
-          if (formFields[_field].name == kv) {
-            formFields[_field].value = fieldsKVPair[kv];
+      var hiddenFieldAttrDiv = document.querySelector(HIDDEN_FIELD_DATA_SELECTOR);
+      if (hiddenFieldAttrDiv && hiddenFieldAttrDiv.getAttribute(HIDDEN_FIELD_DATA_ATTR)) {
+        var dataSiteHiddenFields = hiddenFieldAttrDiv.getAttribute(HIDDEN_FIELD_DATA_ATTR).split(';');
+        for (var i = 0; i < dataSiteHiddenFields.length; i++) {
+          var kv = dataSiteHiddenFields[i].split('=');
+          fieldsKVPair[kv[0]] = kv[1]
+        }
+        var formFields = guideBridge.getFormModel()._fields;
+        for (var kv in fieldsKVPair) {
+          for (var _field in formFields) {
+            if (formFields[_field].name == kv) {
+              formFields[_field].value = fieldsKVPair[kv];
+            }
           }
         }
+      } else {
+        console.log('guidebridge is not connected')
       }
-    } else {
-      console.log('guidebridge is not connected')
     }
   })
 }
