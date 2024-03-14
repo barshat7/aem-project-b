@@ -8,9 +8,5 @@
         siteTemplatePath="/libs/fd/af/themes/canvas"
         themeArtifact="Canvas"
         themePackageName="themePackageName"/>
-    <com.projectB.core.service.FooCaConfig
-      jcr:primaryType="nt:unstructured"
-      company="Hello World"
-      oid="C1"/>
     <com.adobe.cq.wcm.core.components.config.HtmlPageItemsConfig/>
 </jcr:root>
