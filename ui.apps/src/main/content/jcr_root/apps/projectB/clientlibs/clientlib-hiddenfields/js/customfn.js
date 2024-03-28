@@ -48,5 +48,12 @@ function setHiddenFields() {
 }
 
 
-
+/**
+ * enableValidationMessageOnlyOnSubmit
+ * @name enableValidationMessageOnlyOnSubmit
+ * @param {scope} globals
+ */
+function enableValidationMessageOnlyOnSubmit(globals) {
+  globals.functions.setProperty(globals.form, {'properties' : {'enableValidationMessageOnlyOnSubmit' : true}})
+}
 
