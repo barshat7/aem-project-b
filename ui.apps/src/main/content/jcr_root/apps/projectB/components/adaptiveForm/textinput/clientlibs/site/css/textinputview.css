@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 .cmp-adaptiveform-textinput {
-
+  min-height: 150px; /** as of now this is the only way to align the grid items */
 }
 
 .cmp-adaptiveform-textinput__widget {
