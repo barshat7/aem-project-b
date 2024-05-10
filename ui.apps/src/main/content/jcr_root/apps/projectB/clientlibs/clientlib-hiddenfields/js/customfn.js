@@ -57,3 +57,51 @@ function enableValidationMessageOnlyOnSubmit(globals) {
   globals.functions.setProperty(globals.form, {'properties' : {'enableValidationMessageOnlyOnSubmit' : true}})
 }
 
+
+/**
+   * Show animation while form submission is in progress
+   * @param {scope} globals
+   **/
+function showLoadingAnimation(globals) {
+     
+  if (globals.functions.validate().length === 0) {
+    var modalInstance = document.querySelector('.cmp-adaptiveform-custom-loader');
+    if (modalInstance) {
+      modalInstance.style.display = 'flex';
+      document.querySelector('.cmp-adaptiveform-custom-loader__icon').style.display='block'
+      document.querySelector('.cmp-adaptiveform-custom-loader__close').style.display="none";
+      document.querySelector('.cmp-adaptiveform-custom-loader__errormessage').style.display="none";
+    }
+  }
+}
+
+/**
+ * Error handler for form
+ * @param {string} failureMessage
+ **/
+function errorHandler(failureMessage) {
+      var modalInstance = document.querySelector('.cmp-adaptiveform-custom-loader');
+    if (modalInstance) {
+        modalInstance.style.display = 'flex';
+        document.querySelector('.cmp-adaptiveform-custom-loader__errormessage').style.display="block";
+        document.querySelector('.cmp-adaptiveform-custom-loader__close').style.display="block";
+        document.querySelector('.cmp-adaptiveform-custom-loader__errormessage p').innerHTML = failureMessage;
+        document.querySelector('.cmp-adaptiveform-custom-loader__icon').style.display='none';
+    }
+}
+
+
+/**
+ * Add Modal on the form
+ * @param {string} addDialog
+ * @param {string} addDialog
+ **/
+function addDialog() {
+  var modal = '<div class="cmp-adaptiveform-custom-loader"><button role="button" class="cmp-adaptiveform-custom-loader__close">X</button><div class="cmp-adaptiveform-custom-loader__icon">Submitting...</div> 	<div class="cmp-adaptiveform-custom-loader__errormessage"> 		<p> </p> 	</div> </div>';
+  var modalElement = document.createElement('div');
+  modalElement.innerHTML = modal;
+  document.querySelector('body').appendChild(modalElement);
+  document.querySelector('.cmp-adaptiveform-custom-loader__close').addEventListener('click', function() {    
+      document.querySelector('.cmp-adaptiveform-custom-loader').style.display = 'none';
+  });
+}
