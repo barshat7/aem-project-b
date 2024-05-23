@@ -105,3 +105,65 @@ function addDialog() {
       document.querySelector('.cmp-adaptiveform-custom-loader').style.display = 'none';
   });
 }
+
+
+/**
+ * saveData from 
+ * @name saveData Save Form Data periodically 
+ */
+function saveData() {
+
+  try {
+      var key = btoa(window.location.href) + "_afFormData";
+      function savePeriodically() {
+          var formData = guideBridge.getFormModel().exportData();
+          var formDataStr = JSON.stringify(formData);
+          localStorage.setItem(key, formDataStr);
+          console.log('saved in session storage')
+      }
+      guideBridge.connect(function () {
+          savePeriodically()
+          window[key] = setInterval(savePeriodically, 2000);
+      })
+  } catch (e) {
+      console.log('some error occurred while saving data in localstorage', e)
+  }
+}
+
+
+/**
+* fillData from 
+* @name fillData Fill Form Data
+*/
+function fillData() {
+
+  try {
+      var key = btoa(window.location.href) + "_afFormData";
+      var formDataStr = localStorage.getItem(key);
+      if (formDataStr) {
+          var formData = JSON.parse(formDataStr);
+
+          guideBridge.connect(function () {
+              guideBridge.getFormModel().importData(formData)
+          })
+      }
+  } catch (e) {
+      console.log('not able to fill form from localStorage', e);
+  }
+}
+
+/**
+* clearData from 
+* @name clearData Clear Form Data From Local Storage
+*/
+function clearData() {
+  try {
+      var key = btoa(window.location.href) + "_afFormData";
+      console.log('clearing data, clearing interval', key);
+      clearInterval(window[key]);
+
+      localStorage.removeItem(key);
+  } catch (e) {
+      console.log('some error occurred while deleting data from localStorage during submit ')
+  }
+}
