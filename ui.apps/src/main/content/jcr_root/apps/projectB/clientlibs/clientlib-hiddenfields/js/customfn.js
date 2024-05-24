@@ -105,3 +105,16 @@ function addDialog() {
       document.querySelector('.cmp-adaptiveform-custom-loader').style.display = 'none';
   });
 }
+
+
+/**
+ * Reload Form
+ * @name reloadForm
+ **/
+function reloadForm() {
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+}
