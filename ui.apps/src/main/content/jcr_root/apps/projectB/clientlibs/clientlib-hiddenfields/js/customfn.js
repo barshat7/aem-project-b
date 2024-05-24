@@ -118,3 +118,15 @@ function reloadForm() {
     }
   });
 }
+
+/**
+ * Submit Success Handler
+ * @name submitSuccessHandler
+ **/
+function submitSuccessHandler(defaultUrl) {
+  var url = document.querySelector("div[data-af-submission-redirect-url]").getAttribute('data-af-submission-redirect-url');
+  if (!url) {
+    url = defaultUrl;
+  }
+  window.location.href = url;
+}
