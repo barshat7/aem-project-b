@@ -55,15 +55,18 @@ function setHiddenFields() {
  */
 function enableValidationMessageOnlyOnSubmit(globals) {
   globals.functions.setProperty(globals.form, {'properties' : {'enableValidationMessageOnlyOnSubmit' : true}})
+  var formData = globals.functions.exportData();
+  globals.functions.submitForm(formData, true, 'application/json');
+  globals.functions.setProperty(globals.form, {'properties' : {'enableValidationMessageOnlyOnSubmit' : false}})
 }
 
 
 /**
-   * Show animation while form submission is in progress
-   * @param {scope} globals
-   **/
+ * Show animation while form submission is in progress
+ * @param {scope} globals
+ **/
 function showLoadingAnimation(globals) {
-     
+
   if (globals.functions.validate().length === 0) {
     var modalInstance = document.querySelector('.cmp-adaptiveform-custom-loader');
     if (modalInstance) {
@@ -135,8 +138,8 @@ function addDialog() {
   var modalElement = document.createElement('div');
   modalElement.innerHTML = modal;
   document.querySelector('body').appendChild(modalElement);
-  document.querySelector('.cmp-adaptiveform-custom-loader__close').addEventListener('click', function() {    
-      document.querySelector('.cmp-adaptiveform-custom-loader').style.display = 'none';
+  document.querySelector('.cmp-adaptiveform-custom-loader__close').addEventListener('click', function() {
+    document.querySelector('.cmp-adaptiveform-custom-loader').style.display = 'none';
   });
 }
 
@@ -172,17 +175,21 @@ function submitSuccessHandler(defaultUrl) {
  * @param {string} buttonTextOnSubmit The text to show on button while submitting
  */
 function setSubmitButtonAttributes(buttonTextOnSubmit) {
+
+  var validate = guideBridge.getFormModel().validate();
+
   var submitButtonContainer = document.querySelector('div[data-cmp-button-type="submit"]');
-  if (submitButtonContainer) {
+  if (validate.length == 0 && submitButtonContainer) {
+
     var submitBtn = submitButtonContainer.querySelector('button');
     submitBtn.classList.add('optum-submit-button-class');
     submitBtn.setAttribute('aria-disabled', true);
-
+    submitBtn.querySelector('.cmp-adaptiveform-button__icon').style.display="block";
     if (!submitButtonContainer.getAttribute('custom-af-submit-btn-prev-text')) {
       var prevText = submitButtonContainer.querySelector('span').textContent;
       console.log('previous text' + prevText)
       submitButtonContainer.setAttribute('custom-af-submit-btn-prev-text', prevText);
     }
-    submitButtonContainer.querySelector('span').textContent = buttonTextOnSubmit;
+    submitButtonContainer.querySelector('.cmp-adaptiveform-button__text').textContent = buttonTextOnSubmit;
   }
 }
