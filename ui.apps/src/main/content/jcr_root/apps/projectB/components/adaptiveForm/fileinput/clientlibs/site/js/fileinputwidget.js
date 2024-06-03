@@ -116,7 +116,9 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
           this.fileList.removeChild(this.fileList.lastElementChild);
         }
         // set the new value
+        console.log('setValue called.')
         if (value != null) {
+          console.log('setValue inside value != null check', value)
           let self = this;
           // Update the value array with the file
           this.values = value.map(function (file, index) {
@@ -137,7 +139,42 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       }
     }
 
+
+    handleFilePreview (event){
+      let elem = event.target,
+          text = elem.textContent,
+          index = this.getIndexOfText(text, elem),
+          fileDom = null,
+          fileName = null,
+          fileUrl = null;
+
+      // for draft usecase, if text contains "/" in it, it means the file is already uploaded
+      // text should contain the path, assuming that the fileUrl is stored in data element
+      if (index !== -1) {
+        // Store the url of file as data
+        if(typeof elem.dataset.key !== "undefined")
+          fileUrl = elem.dataset.key;
+
+        if(fileUrl)  {
+          //prepend context path if not already appended
+          if (!(fileUrl.lastIndexOf(this.options.contextPath, 0) === 0)) {
+            fileUrl =  this.options.contextPath + fileUrl;
+          }
+          FormView.FormFileInputWidget.previewFile.apply(this, [null, {"fileUrl" : fileUrl}]);
+        } else {
+          // todo: add support here
+          //let previewFileObjIdx = this._getFileObjIdx(index);
+          let previewFile = this.fileArr[index]?.data;
+          let objectUrl = FormView.FormFileInputWidget.previewFileUsingObjectUrl(previewFile);
+          if (objectUrl) {
+            elem.dataset.objectUrl = objectUrl;
+          }
+        }
+      }
+    }
+
     fileItem(fileName, fileSize, comment, fileUrl) {
+      console.log('fileitem')
       let self = this;
       let id = `${Date.now() + '_' + Math.floor(Math.random() * 10000)}_file_size`
       let fileItem = document.createElement('li');
@@ -186,7 +223,89 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       return fileItem;
     }
 
+
+    handleChange(filesUploaded) {
+      if (!this.isFileUpdate) {
+        let currFileName = '',
+            inValidSizefileNames = '',
+            inValidNamefileNames = '',
+            inValidMimeTypefileNames = '',
+            self = this,
+            files = filesUploaded;
+        // Initially set the invalid flag to false
+        let isInvalidSize = false,
+            isInvalidFileName = false,
+            isInvalidMimeType = false;
+        //this.resetIfNotMultiSelect();
+        if (typeof files !== "undefined") {
+          let invalidFilesIndexes = [];
+          Array.from(files).forEach(function (file, fileIndex) {
+            let isCurrentInvalidFileSize = false,
+                isCurrentInvalidFileName = false,
+                isCurrentInvalidMimeType = false;
+            currFileName = file.name.split("\\").pop();
+            // Now size is in MB
+            let size = file.size / 1024 / 1024;
+            // check if file size limit is within limits
+            if ((size > parseFloat(this.options.maxFileSize))) {
+              isInvalidSize = isCurrentInvalidFileSize = true;
+              inValidSizefileNames = currFileName + "," + inValidSizefileNames;
+            } else if (!FormView.FormFileInputWidget.isValid(currFileName)) {
+              // check if file names are valid (ie) there are no control characters in file names
+              isInvalidFileName = isCurrentInvalidFileName = true;
+              inValidNamefileNames = currFileName + "," + inValidNamefileNames;
+            } else {
+              let isMatch = false;
+              let extension = currFileName.split('.').pop();
+              let mimeType = (file.type) ? file.type : self.extensionToMimeTypeMap[extension];
+              if (mimeType != undefined && mimeType.trim().length > 0) {
+                isMatch = this.regexMimeTypeList.some(function (rx) {
+                  return rx.test(mimeType);
+                });
+              }
+              if (!isMatch) {
+                isInvalidMimeType = isCurrentInvalidMimeType = true;
+                inValidMimeTypefileNames = currFileName + "," + inValidMimeTypefileNames;
+              }
+            }
+
+            // if the file is not invalid, show it and push it to internal array
+            if (!isCurrentInvalidFileSize && !isCurrentInvalidFileName && !isCurrentInvalidMimeType) {
+              this.showFileList(currFileName);
+              if(this.isMultiSelect()) {
+                this.values.push(currFileName);
+                this.fileArr.push(file);
+              } else {
+                this.values = [currFileName];
+                this.fileArr = [file];
+              }
+            } else {
+              invalidFilesIndexes.push(fileIndex);
+            }
+
+
+          }, this);
+
+          if (invalidFilesIndexes.length > 0 && this.widget !== null) {
+            this.deleteFilesFromInputDom(invalidFilesIndexes);
+          }
+        }
+
+        // set the new model value.
+        this.model.value = this.fileArr;
+
+        if (isInvalidSize) {
+          this.showInvalidMessage(inValidSizefileNames.substring(0, inValidSizefileNames.lastIndexOf(',')), this.invalidFeature.SIZE);
+        } else if (isInvalidFileName) {
+          this.showInvalidMessage(inValidNamefileNames.substring(0, inValidNamefileNames.lastIndexOf(',')), this.invalidFeature.NAME);
+        } else if (isInvalidMimeType) {
+          this.showInvalidMessage(inValidMimeTypefileNames.substring(0, inValidMimeTypefileNames.lastIndexOf(',')), this.invalidFeature.MIMETYPE);
+        }
+      }
+      this.widget.value = null;
+    }
     showFileList(fileName, fileSize, comment, fileUrl) {
+      console.log('show file list')
       if(!this.isMultiSelect() || fileName === null || typeof fileName === "undefined") {
         // if not multiselect, remove all the children of file list
         while (this.fileList.lastElementChild) {
@@ -197,8 +316,13 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       // Add the file item
       // On click of close, remove the element and update the model
       // handle on click of preview button
+
       if(fileName != null) {
-        this.fileList.append(this.fileItem(fileName, fileSize, comment, fileUrl));
+        var fItem =this.fileItem(fileName, fileSize, comment, fileUrl);
+        console.log('attaching file item to file list');
+        console.log(fItem);
+        console.log(this.fileList)
+        this.fileList.appendChild(fItem);
       }
     }
 
