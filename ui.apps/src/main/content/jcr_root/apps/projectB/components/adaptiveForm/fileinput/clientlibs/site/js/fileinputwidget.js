@@ -207,7 +207,7 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       fileEndContainer.setAttribute('class', "cmp-adaptiveform-fileinput__fileendcontainer");
       fileClose.setAttribute('tabindex', '0');
       fileClose.setAttribute('class', "cmp-adaptiveform-fileinput__filedelete");
-      fileClose.setAttribute('aria-label', FormView.LanguageUtils.getTranslatedString(this.lang, "FileCloseAccessText") + fileName);
+      fileClose.setAttribute('aria-label', "Delete " + fileName);
       fileClose.textContent = "x";
       fileClose.addEventListener('keypress', function(e) {
         if (e.keyCode === 13 || e.charCode === 32) {
@@ -304,6 +304,19 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       }
       this.widget.value = null;
     }
+
+    invalidMessage(fileName, invalidFeature){
+      // todo: have add localization here
+
+      if(invalidFeature === this.invalidFeature.SIZE) {
+        alert("File(s) " + fileName +  " are greater than the expected size: " + this.options.maxFileSize);
+      } else if (invalidFeature === this.invalidFeature.NAME) {
+        alert('Do not attach files where filename starts with (.), contains \ / : * ? " < > | ; % $, or is a reserved keyword like nul, prn, con, lpt, or com.');
+      } else if (invalidFeature === this.invalidFeature.MIMETYPE) {
+        alert("File(s) " + fileName + " are unsupported file types");
+      }
+    }
+
     showFileList(fileName, fileSize, comment, fileUrl) {
       console.log('show file list')
       if(!this.isMultiSelect() || fileName === null || typeof fileName === "undefined") {
