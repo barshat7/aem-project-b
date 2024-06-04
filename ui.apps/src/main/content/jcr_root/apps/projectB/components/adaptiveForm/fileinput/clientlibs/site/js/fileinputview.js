@@ -109,8 +109,18 @@
     }
 
     setModel(model) {
-      super.setModel(model);
-      this.widgetObject = new CustomFileInputWidget(this.widgetFields);
+      if (typeof this._model === "undefined" || this._model === null) {
+        this._model = model;
+      } else {
+        throw "Re-initializing model is not permitted"
+      }
+      const state = this._model.getState();
+      this.applyState(state);
+
+
+      if (this.widgetObject == null){
+        this.widgetObject = new CustomFileInputWidget(this.widgetFields);
+      }
       this.getAttachButtonLabel().addEventListener('focus', () => {
         this.setActive();
       })
@@ -119,9 +129,22 @@
       })
     }
 
-    syncWidget() {}
+
+
+    syncWidget() {
+      let widgetElement = this.getWidget ? this.getWidget() : null;
+      if (widgetElement) {
+        widgetElement.id = this.getId() + "__widget";
+        const closestElement = widgetElement?.previousElementSibling;
+        if (closestElement && closestElement.tagName.toLowerCase() === 'label') {
+          closestElement.setAttribute('for', this.getId() + "__widget");
+        } else {
+          this.getAttachButtonLabel().removeAttribute('for');
+        }
+      }
+    }
   }
-  console.log('fileinput client loadeds')
+
   FormView.Utils.setupField(({element, formContainer}) => {
     return new CustomFileInput({element, formContainer})
   }, CustomFileInput.selectors.self);
