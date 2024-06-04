@@ -129,7 +129,54 @@
       })
     }
 
+    syncMarkupWithModel() {
+      this.syncWidget();
+      this.syncLabel();
+      this.syncShortDesc()
+      this. syncLongDesc()
+      this.syncAriaDescribedBy()
+      this.syncError()
+    }
 
+    syncError() {
+      let errorElement = typeof this.getErrorDiv === 'function' ? this.getErrorDiv() : null;
+      if (errorElement) {
+        errorElement.setAttribute('id', `${this.getId()}__errormessage`);
+      }
+    }
+
+    syncShortDesc() {
+      let shortDescElement = typeof this.getTooltipDiv === 'function' ? this.getTooltipDiv() : null;
+      if (shortDescElement) {
+        shortDescElement.setAttribute('id', `${this.getId()}__shortdescription`);
+      }
+    }
+
+    syncLongDesc() {
+      let longDescElement = typeof this.getDescription === 'function' ? this.getDescription() : null;
+      if (longDescElement) {
+        longDescElement.setAttribute('id', `${this.getId()}__longdescription`);
+      }
+    }
+
+    syncAriaDescribedBy() {
+      const widgetElement = this.getWidget();
+      if (widgetElement) {
+        let ariaDescribedby = widgetElement.id;
+        const componentId = this.getId();
+        if (this.getDescription()) {
+          ariaDescribedby += " " + componentId + "__longdescription";
+        }
+        if (this.getTooltipDiv()) {
+          ariaDescribedby += " " + componentId + "__shortdescription";
+        }
+        if (this.getErrorDiv() && this.getErrorDiv().innerHTML) {
+          ariaDescribedby += " " + componentId + "__errormessage";
+        }
+        const attachButton = this.getAttachButtonLabel();
+        attachButton.setAttribute('aria-describedby', ariaDescribedby)
+      }
+    }
 
     syncWidget() {
       let widgetElement = this.getWidget ? this.getWidget() : null;
@@ -143,6 +190,14 @@
         }
       }
     }
+
+    syncLabel() {
+      let labelElement = typeof this.getLabel === 'function' ? this.getLabel() : null;
+      if (labelElement) {
+        labelElement.setAttribute('for', this.getId() + "__widget");
+      }
+    }
+
   }
 
   FormView.Utils.setupField(({element, formContainer}) => {
