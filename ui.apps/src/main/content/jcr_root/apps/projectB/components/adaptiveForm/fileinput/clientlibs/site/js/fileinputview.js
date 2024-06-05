@@ -168,6 +168,7 @@
     syncAriaDescribedBy() {
       const attachButton = this.getAttachButtonLabel();
       if (attachButton) {
+        const widgetElement = this.getWidget();
         let ariaDescribedby = widgetElement.id;
         const componentId = this.getId();
         if (this.getDescription()) {
