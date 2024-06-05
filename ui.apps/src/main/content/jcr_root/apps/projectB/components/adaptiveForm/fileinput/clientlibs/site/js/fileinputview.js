@@ -129,9 +129,22 @@
       })
     }
 
-    updateValidity(validity, state) {
-      super.updateValidity(validity, state);
-      this.syncMarkupWithModel()
+    updateValidationMessage(validationMessage, state) {
+      if (this.errorDiv) {
+        // Check if the validationMessage is different from the current content
+        if (this.errorDiv.innerHTML !== state.validationMessage) {
+          this.errorDiv.innerHTML = state.validationMessage;
+          if (state.validity.valid === false) {
+            // Find the first key whose value is true
+            const validationType = Object.keys(state.validity).find(key => key !== 'valid' && state.validity[key] === true);
+            // if there is no error message in model, set a default error in the view
+            if (!state.validationMessage) {
+              this.errorDiv.innerHTML = LanguageUtils.getTranslatedString(this.formContainer.getModel().lang, "defaultError");
+            }
+          }
+          this.syncAriaDescribedBy();
+        }
+      }
     }
 
 
