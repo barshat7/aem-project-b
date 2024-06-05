@@ -129,7 +129,73 @@
       })
     }
 
+    updateValidationMessage(validationMessage, state) {
+      if (this.errorDiv) {
+        // Check if the validationMessage is different from the current content
+        if (this.errorDiv.innerHTML !== state.validationMessage) {
+          this.errorDiv.innerHTML = state.validationMessage;
+          if (state.validity.valid === false) {
+            // Find the first key whose value is true
+            const validationType = Object.keys(state.validity).find(key => key !== 'valid' && state.validity[key] === true);
+            // if there is no error message in model, set a default error in the view
+            if (!state.validationMessage) {
+              this.errorDiv.innerHTML = LanguageUtils.getTranslatedString(this.formContainer.getModel().lang, "defaultError");
+            }
+          }
+          this.syncAriaDescribedBy();
+        }
+      }
+    }
 
+
+    syncMarkupWithModel() {
+      this.syncWidget();
+      this.syncLabel();
+      this.syncShortDesc()
+      this. syncLongDesc()
+      this.syncAriaDescribedBy()
+      this.syncError()
+    }
+
+    syncError() {
+      let errorElement = typeof this.getErrorDiv === 'function' ? this.getErrorDiv() : null;
+      if (errorElement) {
+        errorElement.setAttribute('id', `${this.getId()}__errormessage`);
+      }
+    }
+
+    syncShortDesc() {
+      let shortDescElement = typeof this.getTooltipDiv === 'function' ? this.getTooltipDiv() : null;
+      if (shortDescElement) {
+        shortDescElement.setAttribute('id', `${this.getId()}__shortdescription`);
+      }
+    }
+
+    syncLongDesc() {
+      let longDescElement = typeof this.getDescription === 'function' ? this.getDescription() : null;
+      if (longDescElement) {
+        longDescElement.setAttribute('id', `${this.getId()}__longdescription`);
+      }
+    }
+
+    syncAriaDescribedBy() {
+      const attachButton = this.getAttachButtonLabel();
+      if (attachButton) {
+        const widgetElement = this.getWidget();
+        let ariaDescribedby = widgetElement.id;
+        const componentId = this.getId();
+        if (this.getDescription()) {
+          ariaDescribedby += " " + componentId + "__longdescription";
+        }
+        if (this.getTooltipDiv()) {
+          ariaDescribedby += " " + componentId + "__shortdescription";
+        }
+        if (this.getErrorDiv() && this.getErrorDiv().innerHTML) {
+          ariaDescribedby += " " + componentId + "__errormessage";
+        }
+        attachButton.setAttribute('aria-describedby', ariaDescribedby)
+      }
+    }
 
     syncWidget() {
       let widgetElement = this.getWidget ? this.getWidget() : null;
@@ -143,6 +209,14 @@
         }
       }
     }
+
+    syncLabel() {
+      let labelElement = typeof this.getLabel === 'function' ? this.getLabel() : null;
+      if (labelElement) {
+        labelElement.setAttribute('for', this.getId() + "__widget");
+      }
+    }
+
   }
 
   FormView.Utils.setupField(({element, formContainer}) => {
