@@ -129,6 +129,12 @@
       })
     }
 
+    updateValidity(validity, state) {
+      super.updateValidity(validity, state);
+      this.syncMarkupWithModel()
+    }
+
+
     syncMarkupWithModel() {
       this.syncWidget();
       this.syncLabel();
@@ -160,8 +166,8 @@
     }
 
     syncAriaDescribedBy() {
-      const widgetElement = this.getWidget();
-      if (widgetElement) {
+      const attachButton = this.getAttachButtonLabel();
+      if (attachButton) {
         let ariaDescribedby = widgetElement.id;
         const componentId = this.getId();
         if (this.getDescription()) {
@@ -173,7 +179,6 @@
         if (this.getErrorDiv() && this.getErrorDiv().innerHTML) {
           ariaDescribedby += " " + componentId + "__errormessage";
         }
-        const attachButton = this.getAttachButtonLabel();
         attachButton.setAttribute('aria-describedby', ariaDescribedby)
       }
     }
