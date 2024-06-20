@@ -30,6 +30,12 @@ public class HiddenDataFieldProvider {
         put("oid", "3");
       }
     });
+    hiddenFields.put("foobar", new HashMap<String, String>() {
+      {
+        put("companyId", "foobar");
+        put("oid", "11");
+      }
+    });
   }
 
   public static String getFieldsAsJson(String env) {
