@@ -3,6 +3,9 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
 
     constructor(params) {
       super(params);
+      this.dragArea = params.dragArea;
+      this.fileSet = [];
+      this.elementToFocusAfterDelete = null;
     }
 
     attachEventHandlers(widget, dragArea, model) {
@@ -24,9 +27,10 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
         this.handleChange(event?.clipboardData?.files);
       });
 
-      const customBtn = dragArea?.querySelector(".cmp-adaptiveform-fileinput__widgetlabel")
-
-      console.log('custom button handler')
+      const customBtn = dragArea?.querySelector(".cmp-adaptiveform-fileinput__widgetlabel");
+      
+		
+     
       customBtn?.addEventListener("click", (event) => {
         event.preventDefault();
         widget.click();
@@ -46,11 +50,21 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
      * @param event
      */
     handleClick (event){
+      
       let elem = event.target,
           text = elem.parentElement.previousSibling.textContent,
           index = this.getIndexOfText(text, elem),
           url = elem.parentElement.previousSibling.dataset.key,
           objectUrl = elem.parentElement.previousSibling.dataset.objectUrl;
+       
+      	const fileToDelete = elem.getAttribute('data-custom-filename');
+        
+       for (let i = 1; i < this.fileSet.length; i++) {
+          if (this.fileSet[i] == fileToDelete) {
+            this.elementToFocusAfterDelete = this.fileSet[i-1];
+          }
+	}
+        
       if (index !== -1) {
         this.values.splice(index, 1);
         this.fileArr.splice(index, 1);
@@ -76,8 +90,12 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       //All bound events and jQuery data associated with the element are also removed
       elem.parentElement.parentElement.remove();
       // Set the focus on file upload button after click of close
-      this.widget.focus();
-
+      
+        
+        if (this.fileList && this.fileList.children && this.fileList.children.length==0) {
+         
+      		this.dragArea.querySelector(".cmp-adaptiveform-fileinput__widgetlabel").focus()
+      	}
     }
 
     formatBytes(bytes, decimals = 0) {
@@ -91,6 +109,7 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
     }
 
     setValue(value) {
+     	
       let isValueSame = false;
       if (value != null) {
         // change to array since we store array internally
@@ -108,6 +127,7 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
           let url = elem.dataset.key;
           if (typeof url !== "undefined") {
             let fileName = url.substring(url.lastIndexOf("/") + 1);
+              
             oldUrls[fileName] = url;
           }
         });
@@ -116,7 +136,7 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
           this.fileList.removeChild(this.fileList.lastElementChild);
         }
         // set the new value
-        console.log('setValue called.')
+       
         if (value != null) {
           console.log('setValue inside value != null check', value)
           let self = this;
@@ -174,16 +194,16 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
     }
 
     fileItem(fileName, fileSize, comment, fileUrl) {
-      console.log('fileitem')
+      
       let self = this;
-      let id = `${Date.now() + '_' + Math.floor(Math.random() * 10000)}_file_size`
+      let id = fileName;
       let fileItem = document.createElement('li');
       fileItem.setAttribute("class", "cmp-adaptiveform-fileinput__fileitem");
       let fileNameDom = document.createElement('a');
       let fileSizeDom = document.createElement('span');
 
       fileSizeDom.setAttribute('class', "cmp-adaptiveform-fileinput__filesize");
-      fileSizeDom.setAttribute('id', id);
+      
       fileSizeDom.textContent = this.formatBytes(fileSize);
 
       fileNameDom.setAttribute('tabindex', '0');
@@ -209,6 +229,7 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       fileClose.setAttribute('class', "cmp-adaptiveform-fileinput__filedelete");
       fileClose.setAttribute('aria-label', "Delete " + fileName);
       fileClose.textContent = "x";
+      fileClose.setAttribute('data-custom-filename', fileName);
       fileClose.addEventListener('keypress', function(e) {
         if (e.keyCode === 13 || e.charCode === 32) {
           e.target.click();
@@ -318,7 +339,11 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
     }
 
     showFileList(fileName, fileSize, comment, fileUrl) {
-      console.log('show file list')
+      
+      if (!this.fileSet.includes(fileName)) {
+      	this.fileSet.push(fileName);
+      }
+       
       if(!this.isMultiSelect() || fileName === null || typeof fileName === "undefined") {
         // if not multiselect, remove all the children of file list
         while (this.fileList.lastElementChild) {
@@ -332,11 +357,21 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
 
       if(fileName != null) {
         var fItem =this.fileItem(fileName, fileSize, comment, fileUrl);
-        console.log('attaching file item to file list');
-        console.log(fItem);
-        console.log(this.fileList)
+       
         this.fileList.appendChild(fItem);
       }
+      
+      if (this.elementToFocusAfterDelete) {
+        const selector = 'button[data-custom-filename=' + '"' + this.elementToFocusAfterDelete + '"]';
+         
+      	const fieldToFocus = document.querySelector(selector);
+          
+        if (fieldToFocus) {
+            console.log('focussing on ' + selector)
+        	fieldToFocus.focus();
+            
+        } 
+      }  
     }
 
   }
