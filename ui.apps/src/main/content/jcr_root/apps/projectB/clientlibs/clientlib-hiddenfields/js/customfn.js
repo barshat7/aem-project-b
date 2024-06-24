@@ -193,3 +193,27 @@ function setSubmitButtonAttributes(buttonTextOnSubmit) {
     submitButtonContainer.querySelector('.cmp-adaptiveform-button__text').textContent = buttonTextOnSubmit;
   }
 }
+
+
+/**
+ * Set Focus on a Field (fieldToFocus) when the currentField is changed
+ * @name setFocusOn
+ * @param {object} currentField
+ * @param {object} fieldToFocus
+ * @param {scope} globals
+ */
+function setFocusOn(currentField, fieldToFocus, globals) {
+  var widgetId = currentField._jsonModel.id + "-widget";
+    var widget = document.getElementById(widgetId);
+    if (widget) {
+    	widget.addEventListener('keydown', function(event) {
+            var _currentField = currentField;
+        	if (event.keyCode == 9) {
+                    event.preventDefault();
+                    var _model = guideBridge.getFormModel().getElement(_currentField.$id);
+                	_model.value = event.target.value;
+                    globals.functions.setFocus(fieldToFocus);
+  				}
+        })
+    } 
+}
