@@ -328,7 +328,12 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
     }
 
     showFileList(fileName, fileSize, comment, fileUrl) {
-     
+      
+      // Keep adding the files to the fileSet
+      if (!this.fileSet.includes(fileName)) {
+      	this.fileSet.push(fileName);
+      }
+
       if(!this.isMultiSelect() || fileName === null || typeof fileName === "undefined") {
         // if not multiselect, remove all the children of file list
         while (this.fileList.lastElementChild) {
@@ -344,7 +349,7 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
         var fItem =this.fileItem(fileName, fileSize, comment, fileUrl);
         this.fileList.appendChild(fItem);
       }
-
+      // If this.elementToFocusAfterDelete is set, focus on this element after delete
       if (this.elementToFocusAfterDelete) {
         const selector = 'button[data-custom-filename=' + '"' + this.elementToFocusAfterDelete + '"]';
       	const fieldToFocus = document.querySelector(selector);
