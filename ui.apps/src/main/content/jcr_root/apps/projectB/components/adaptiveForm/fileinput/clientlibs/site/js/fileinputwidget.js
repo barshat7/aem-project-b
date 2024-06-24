@@ -3,6 +3,9 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
 
     constructor(params) {
       super(params);
+      this.dragArea = params.dragArea;
+      this.fileSet = [];
+      this.elementToFocusAfterDelete = null;
     }
 
     attachEventHandlers(widget, dragArea, model) {
@@ -26,7 +29,6 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
 
       const customBtn = dragArea?.querySelector(".cmp-adaptiveform-fileinput__widgetlabel")
 
-      console.log('custom button handler')
       customBtn?.addEventListener("click", (event) => {
         event.preventDefault();
         widget.click();
@@ -51,6 +53,13 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
           index = this.getIndexOfText(text, elem),
           url = elem.parentElement.previousSibling.dataset.key,
           objectUrl = elem.parentElement.previousSibling.dataset.objectUrl;
+
+      const fileToDelete = elem.getAttribute('data-custom-filename');
+        for (let i = 1; i < this.fileSet.length; i++) {
+          if (this.fileSet[i] == fileToDelete) {
+            this.elementToFocusAfterDelete = this.fileSet[i-1];
+          }
+	    }
       if (index !== -1) {
         this.values.splice(index, 1);
         this.fileArr.splice(index, 1);
@@ -75,9 +84,10 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
       // Remove the dom from view
       //All bound events and jQuery data associated with the element are also removed
       elem.parentElement.parentElement.remove();
-      // Set the focus on file upload button after click of close
-      this.widget.focus();
-
+      // Set the focus on file upload button after click of close and no other file is present
+      if (this.fileList && this.fileList.children && this.fileList.children.length==0) {
+        this.dragArea.querySelector(".cmp-adaptiveform-fileinput__widgetlabel").focus()
+      }
     }
 
     formatBytes(bytes, decimals = 0) {
@@ -318,7 +328,7 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
     }
 
     showFileList(fileName, fileSize, comment, fileUrl) {
-      console.log('show file list')
+     
       if(!this.isMultiSelect() || fileName === null || typeof fileName === "undefined") {
         // if not multiselect, remove all the children of file list
         while (this.fileList.lastElementChild) {
@@ -332,12 +342,16 @@ if (typeof window.CustomFileInputWidget === 'undefined') {
 
       if(fileName != null) {
         var fItem =this.fileItem(fileName, fileSize, comment, fileUrl);
-        console.log('attaching file item to file list');
-        console.log(fItem);
-        console.log(this.fileList)
         this.fileList.appendChild(fItem);
       }
-    }
 
+      if (this.elementToFocusAfterDelete) {
+        const selector = 'button[data-custom-filename=' + '"' + this.elementToFocusAfterDelete + '"]';
+      	const fieldToFocus = document.querySelector(selector);
+        if (fieldToFocus) {
+        	fieldToFocus.focus();
+        } 
+      }  
+    }
   }
 }
