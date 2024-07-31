@@ -2,7 +2,7 @@
 <workspaceFilter version="1.0">
     <filter root="/apps/projectB/clientlibs"/>
     <filter root="/apps/projectB/components"/>
+    <filter root="/apps/projectB/customsubmittype"/>
     <filter root="/apps/projectB/i18n"/>
     <filter root="/apps/fd/af/themes" mode="merge"/>
-
 </workspaceFilter>
